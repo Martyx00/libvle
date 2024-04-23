@@ -6,6 +6,11 @@
 #include <string.h>
 
 #define PFMT64x "lx"
+#define E_D8_N   7
+#define E_BD15b  2
+#define E_BD15c  3
+#define F_CFH    23
+#define F_X_EI 14
 
 enum e_encoding_type {
   E_NONE  = 0,
@@ -533,7 +538,7 @@ const se_vle_t se_ops[] = {
   { "se_subi."  , 0x2600, 0x27FF, 2,   OP_TYPE_SUB, COND_AL, {{0x01F0,  4,  0,  1, 1, TYPE_IMM}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
 };
 
-
+/*
 static void set_e_fields(vle_t * v, const e_vle_t* p, uint32_t data) {
   if (!v) {
     return;
@@ -910,7 +915,7 @@ static void set_ppc_fields(vle_t * v, const ppc_t* p, uint32_t data) {
       v->n = 2;
       v->fields[0].value = (data & 0x1E00000) >> 21;
       v->fields[0].type = p->types[0];
-      /* v->fields[1].value = (data & 0x1FF800) >> 11; */
+      // v->fields[1].value = (data & 0x1FF800) >> 11; 
       v->fields[1].value = ((data & 0x1f0000) >> 16) | ((data & 0xf800) >> 6);
       v->fields[1].type = p->types[1];
       break;
@@ -931,6 +936,83 @@ static void set_ppc_fields(vle_t * v, const ppc_t* p, uint32_t data) {
       break;
   }
 }
+static vle_t *find_ppc(const ut8* buffer, ut32 addr) {
+	ut32 i;
+	ut32 data = (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
+	const ppc_t* p = NULL;
+	const ut32 size = sizeof (ppc_ops) / sizeof (ppc_t);
+	for (i = 0; i < size; ++i) {
+		p = &ppc_ops[i];
+		if ((p->op & data) == p->op && (p->mask & data) == data) {
+			vle_t* ret = (vle_t*) calloc(1, sizeof(vle_t));
+			ret->name = p->name;
+			ret->size = 4;
+			ret->n = 0;
+			set_ppc_fields (ret, p, data, addr);
+			return ret;
+		}
+	}
+	return NULL;
+}
+
+static vle_t *find_e(const ut8* buffer, ut32 addr) {
+	ut32 i;
+	ut32 data = (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
+	const e_vle_t* p = NULL;
+	const ut32 size = sizeof (e_ops) / sizeof (e_vle_t);
+	for (i = 0; i < size; ++i) {
+		p = &e_ops[i];
+		if ((p->op & data) == p->op && (p->mask & data) == data) {
+			vle_t* ret = (vle_t*) calloc(1, sizeof(vle_t));
+			ret->name = p->name;
+			ret->size = 4;
+			ret->n = 0;
+			set_e_fields (ret, p, data, addr);
+			return ret;
+		}
+	}
+	return NULL;
+}
+
+static vle_t *find_se(const ut8* buffer, ut32 addr) {
+	ut32 i, j, k;
+	ut16 data = (buffer[0] << 8) | buffer[1];
+	const se_vle_t* p = NULL;
+	const ut32 size = sizeof (se_ops) / sizeof (se_vle_t);
+	for (i = 0; i < size; ++i) {
+		p = &se_ops[i];
+		if ((p->op & data) == p->op && (p->mask & data) == data) {
+			vle_t* ret = (vle_t*) calloc(1, sizeof(vle_t));
+			ret->name = p->name;
+			ret->size = 2;
+			for (j = 0; j < p->n; ++j) {
+				for (k = 0; k < p->n; ++k) {
+					if (p->fields[k].idx == j) {
+						ret->fields[j].value = data & p->fields[k].mask;
+						ret->fields[j].value >>= p->fields[k].shr;
+						ret->fields[j].value <<= p->fields[k].shl;
+						ret->fields[j].value += p->fields[k].add;
+						ret->fields[j].value &= 0xFFFF;
+						if (p->fields[k].type == TYPE_REG && ret->fields[j].value & 0x8) {
+							ret->fields[j].value = (ret->fields[j].value & 0x7) + 24;
+						} else if (p->fields[k].type == TYPE_JMP) {
+							if (ret->fields[j].value & 0x0100) {
+								ret->fields[j].value = 0xFFFFFE00 | ret->fields[j].value;
+							}
+							ret->fields[j].value += addr;
+						}
+						ret->fields[j].type = p->fields[k].type;
+						break;
+					}
+				}
+			}
+			ret->n = p->n;
+			return ret;
+		}
+	}
+	return NULL;
+}
+
 
 static vle_t *find_ppc(const uint8_t* buffer, vle_t* ret) {
   uint32_t i;
@@ -1012,7 +1094,542 @@ static vle_t *find_se(const uint8_t* buffer, vle_t* ret) {
   }
   return NULL;
 }
+*/
 
+static void set_e_fields(vle_t * v, const e_vle_t* p, ut32 data, ut32 addr) {
+	if (!v) {
+		return;
+	}
+	switch (p->type) {
+		case E_X:
+		{
+			v->n = 3;
+			v->fields[0].value = (data & 0x3E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1F0000) >> 16;
+			v->fields[1].type = p->types[1];
+			v->fields[2].value = (data & 0xF800) >> 11;
+			v->fields[2].type = p->types[2];
+		}
+			break;
+		case E_XRA:
+		{
+			v->n = 3;
+			v->fields[0].value = (data & 0x1F0000) >> 16;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x3E00000) >> 21;
+			v->fields[1].type = p->types[1];
+			v->fields[2].value = (data & 0xF800) >> 11;
+			v->fields[2].type = p->types[2];
+		}
+			break;
+		case E_XL:
+		{
+			v->n = 3;
+			v->fields[0].value = (data & 0x3E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1F0000) >> 16;
+			v->fields[1].type = p->types[1];
+			v->fields[2].value = (data & 0xF800) >> 11;
+			v->fields[2].type = p->types[2];
+		}
+			break;
+		case E_D:
+		{
+			v->n = 3;
+			v->fields[0].value = (data & 0x3E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1F0000) >> 16;
+			v->fields[1].type = p->types[1];
+			v->fields[2].value = data & 0xFFFF;
+			if (v->fields[2].value & 0x8000) {
+				v->fields[2].value = 0xFFFF0000 | v->fields[2].value;
+			}
+			v->fields[2].type = p->types[2];
+		}
+			break;
+		case E_D8:
+		{
+			v->n = 3;
+			v->fields[0].value = (data & 0x3E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1F0000) >> 16;
+			v->fields[1].type = p->types[1];
+			v->fields[2].value = data & 0xFF;
+			if (v->fields[2].value & 0x80) {
+				v->fields[2].value = 0xFFFFFF00 | v->fields[2].value;
+			}
+			v->fields[2].type = p->types[2];
+		}
+			break;
+		/*case E_D8_N:
+		{
+			v->n = 2;
+			v->fields[0].value = (data & 0x1F0000) >> 16;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = data & 0xFF;
+			if (v->fields[1].value & 0x80) {
+				v->fields[1].value = 0xFFFFFF00 | v->fields[1].value;
+			}
+			v->fields[1].type = p->types[1];
+		}
+			break;*/
+		case E_IA16U:
+		{
+			v->n = 2;
+			v->fields[1].value = (data & 0x3E00000) >> 10;
+			v->fields[1].type = p->types[0];
+			v->fields[0].value = (data & 0x1F0000) >> 16;
+			v->fields[0].type = p->types[1];
+			v->fields[1].value |= (data & 0x7FF);
+		}
+			break;
+		case E_IA16:
+		case E_I16A:
+		{
+			v->n = 2;
+			v->fields[1].value = (data & 0x3E00000) >> 10;
+			v->fields[1].type = p->types[0];
+			v->fields[0].value = (data & 0x1F0000) >> 16;
+			v->fields[0].type = p->types[1];
+			v->fields[1].value |= (data & 0x7FF);
+			if (v->fields[1].value & 0x8000) {
+				v->fields[1].value = 0xFFFF0000 | v->fields[1].value;
+			}
+		}
+			break;
+		case E_SCI8:
+		case E_SCI8CR:
+		{
+			v->n = 3;
+			v->fields[0].value = (data & 0x3E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			if (p->type == E_SCI8CR) {
+				v->fields[0].value &= 0x3;
+			}
+			v->fields[1].value = (data & 0x1F0000) >> 16;
+			v->fields[1].type = p->types[1];
+			ut32 ui8 = data & 0xFF;
+			ut32 scl = (data & 0x300) >> 8;
+			ut32 f = data & 0x400;
+			switch (scl) {
+				case 0:
+					v->fields[2].value = ui8 | (f ? 0xffffff00 : 0);
+					break;
+				case 1:
+					v->fields[2].value = (ui8 << 8) | (f ? 0xffff00ff : 0);
+					break;
+				case 2:
+					v->fields[2].value = (ui8 << 16) | (f ? 0xff00ffff : 0);
+					break;
+				default:
+					v->fields[2].value = (ui8 << 24) | (f ? 0x00ffffff : 0);
+					break;
+			}
+			v->fields[2].type = p->types[2];
+		}
+			break;
+		case E_SCI8I:
+		{
+			v->n = 3;
+			v->fields[1].value = (data & 0x3E00000) >> 21;
+			v->fields[1].type = p->types[0];
+			v->fields[0].value = (data & 0x1F0000) >> 16;
+			v->fields[0].type = p->types[1];
+			ut32 ui8 = data & 0xFF;
+			ut32 scl = (data & 0x300) >> 8;
+			ut32 f = data & 0x400;
+			switch (scl) {
+				case 0:
+					v->fields[2].value = ui8 | (f ? 0xffffff00 : 0);
+					break;
+				case 1:
+					v->fields[2].value = (ui8 << 8) | (f ? 0xffff00ff : 0);
+					break;
+				case 2:
+					v->fields[2].value = (ui8 << 16) | (f ? 0xff00ffff : 0);
+					break;
+				default:
+					v->fields[2].value = (ui8 << 24) | (f ? 0x00ffffff : 0);
+					break;
+			}
+			v->fields[2].type = p->types[2];
+		}
+			break;
+		case E_I16L:
+		{
+			v->n = 2;
+			v->fields[0].value = (data & 0x3E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1F0000) >> 5;
+			v->fields[1].value |= (data & 0x7FF);
+			v->fields[1].type = p->types[1];
+		}
+			break;
+		case E_I16LS:
+		{
+			v->n = 2;
+			v->fields[0].value = (data & 0x3E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1F0000) >> 5;
+			v->fields[1].value |= (data & 0x7FF);
+			v->fields[1].type = p->types[1];
+		}
+			break;
+		case E_BD24:
+		{
+			v->n = 1;
+			v->fields[0].value = data & 0x3FFFFFE;
+			if (v->fields[0].value & 0x1000000) {
+				v->fields[0].value |= 0xFE000000;
+			}
+			v->fields[0].type = p->types[0];
+		}
+			break;
+		case E_BD15:
+		{
+			v->n = 2;
+			v->fields[0].value = (data & 0xC0000) >> 18;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = data & 0xFFFE;
+			if (v->fields[1].value & 0x8000) {
+				v->fields[1].value |= 0xFFFF0000;
+			}
+			v->fields[1].type = p->types[1];
+		}
+			break;
+		/*case E_BD15b:
+		{
+			v->n = 3;
+			v->fields[0].value = (data & 0x300000) >> 20;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0xF0000) >> 16;
+			v->fields[1].type = p->types[0];
+			v->fields[2].value = data & 0xFFFE;
+			if (v->fields[2].value & 0x8000) {
+				v->fields[2].value |= 0xFFFF0000;
+			}
+			v->fields[2].type = p->types[2];
+		}
+			break;*/
+		/*case E_BD15c:
+		{
+			v->n = 1;
+			v->fields[0].value = data & 0xFFFE;
+			if (v->fields[0].value & 0x8000) {
+				v->fields[0].value |= 0xFFFF0000;
+			}
+			v->fields[0].type = p->types[0];
+		}
+			break;*/
+		case E_LI20:
+		{
+			v->n = 2;
+			v->fields[0].value = (data & 0x03E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = ((data & 0x001F0000) >> 5);
+			v->fields[1].value |= ((data & 0x7800) << 5);
+			v->fields[1].value |= (data & 0x7FF);
+			v->fields[1].type = p->types[1];
+			if (v->fields[1].value & 0x80000) {
+				v->fields[1].value = 0xFFF00000 | v->fields[1].value;
+			}
+		}
+			break;
+		case E_M:
+		{
+			v->n = 5;
+			v->fields[1].value = (data & 0x3E00000) >> 21;
+			v->fields[1].type = p->types[1];
+			v->fields[0].value = (data & 0x1F0000) >> 16;
+			v->fields[0].type = p->types[0];
+			v->fields[2].value = (data & 0xF800) >> 11;
+			v->fields[2].type = p->types[2];
+			v->fields[3].value = (data & 0x7C0) >> 6;
+			v->fields[3].type = p->types[3];
+			v->fields[4].value = (data & 0x3E) >> 1;
+			v->fields[4].type = p->types[4];
+		}
+			break;
+		case E_XCR:
+		{
+			v->n = 3;
+			v->fields[0].value = (data & 0x3000000) >> 24;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1F0000) >> 16;
+			v->fields[1].type = p->types[1];
+			v->fields[2].value = (data & 0xF800) >> 11;
+			v->fields[2].type = p->types[2];
+		}
+			break;
+		case E_XLSP:
+		{
+			v->n = 3;
+			v->fields[0].value = (data & 0x3800000) >> 23;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1C0000) >> 18;
+			v->fields[1].type = p->types[1];
+		}
+			break;
+		case E_NONE:
+		default:
+			v->n = 0;
+			break;
+	}
+	ut16 i;
+	for (i = 0; i < v->n; ++i) {
+		if (v->fields[i].type == TYPE_JMP) {
+			v->fields[i].value += addr;
+		}
+	}
+}
+
+static void set_ppc_fields(vle_t * v, const ppc_t* p, ut32 data, ut32 addr) {
+	if (!v) {
+		return;
+	}
+	switch (p->type) {
+		case F_X:
+		case F_XO:
+		case F_EVX:
+		{
+			v->n = 0;
+			if (p->types[0] != TYPE_NONE) {
+				v->fields[0].value = (data & 0x3E00000) >> 21;
+				v->fields[0].type = p->types[0];
+				v->n++;
+			}
+			if (p->types[1] != TYPE_NONE) {
+				v->fields[1].value = (data & 0x1F0000) >> 16;
+				v->fields[1].type = p->types[1];
+				v->n++;
+			}
+			if (p->types[2] != TYPE_NONE) {
+				v->fields[2].value = (data & 0xF800) >> 11;
+				v->fields[2].type = p->types[2];
+				v->n++;
+			}
+		}
+			break;
+		/*case F_FRA:
+		{
+			v->n = 1;
+			v->fields[0].value = (data & 0x8000) >> 15;
+			v->fields[0].type = p->types[0];
+		}
+			break;*/
+		case F_XRA:
+		{
+			v->n = 3;
+			v->fields[1].value = (data & 0x3E00000) >> 21;
+			v->fields[1].type = p->types[0];
+			v->fields[0].value = (data & 0x1F0000) >> 16;
+			v->fields[0].type = p->types[1];
+			v->fields[2].value = (data & 0xF800) >> 11;
+			v->fields[2].type = p->types[2];
+		}
+			break;
+		case F_CMP:
+		{
+			v->n = 3;
+			v->fields[0].value = (data & 0x3800000) >> 23;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1F0000) >> 16;
+			v->fields[1].type = p->types[1];
+			v->fields[2].value = (data & 0xF800) >> 11;
+			v->fields[2].type = p->types[2];
+		}
+			break;
+		case F_DCBF:
+		{
+			v->n = 3;
+			v->fields[0].value = (data & 0x0E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1F0000) >> 16;
+			v->fields[1].type = p->types[1];
+			v->fields[2].value = (data & 0xF800) >> 11;
+			v->fields[2].type = p->types[2];
+		}
+			break;
+		case F_DCBL:
+		{
+			v->n = 3;
+			v->fields[0].value = (data & 0x1E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1F0000) >> 16;
+			v->fields[1].type = p->types[1];
+			v->fields[2].value = (data & 0xF800) >> 11;
+			v->fields[2].type = p->types[2];
+		}
+			break;
+		case F_DCI:
+		{
+			v->n = 1;
+			v->fields[0].value = (data & 0xE00000) >> 21;
+			v->fields[0].type = p->types[0];
+		}
+			break;
+		case F_EXT:
+		{
+			v->n = 2;
+			v->fields[0].value = (data & 0x3E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1F0000) >> 16;
+			v->fields[1].type = p->types[1];
+		}
+			break;
+		case F_A:
+		{
+			v->n = 4;
+			v->fields[0].value = (data & 0x1E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1F0000) >> 16;
+			v->fields[1].type = p->types[1];
+			v->fields[2].value = (data & 0xF800) >> 11;
+			v->fields[2].type = p->types[2];
+			v->fields[3].value = (data & 0x7C0) >> 6;
+			v->fields[3].type = p->types[3];
+		}
+			break;
+		case F_XFX:
+		{
+			v->n = 1;
+			v->fields[0].value = (data & 0x3E00000) >> 21;
+			v->fields[0].type = p->types[0];
+		}
+			break;
+		case F_CFH:
+		{
+			v->n = 2;
+			v->fields[0].value = (data & 0x3E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0xF800) >> 11;
+			v->fields[1].type = p->types[1];
+		}
+			break;
+		case F_XER:
+		{
+			v->n = 1;
+			v->fields[0].value = (data & 0x3800000) >> 23;
+			v->fields[0].type = p->types[0];
+		}
+			break;
+		case F_MFPR:
+		{
+			v->n = 2;
+			v->fields[0].value = (data & 0x1E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1FF800) >> 11;
+			v->fields[1].type = p->types[1];
+			break;
+		}
+		case F_MTPR:
+		{
+			v->n = 2;
+			//inverted
+			v->fields[1].value = (data & 0x1E00000) >> 21;
+			v->fields[1].type = p->types[1];
+			v->fields[0].value = (data & 0x1FF800) >> 11;
+			v->fields[0].type = p->types[0];
+		}
+			break;
+		case E_NONE:
+		default:
+			v->n = 0;
+			break;
+	}
+	ut16 i;
+	for (i = 0; i < v->n; ++i) {
+		if (v->fields[i].type == TYPE_JMP) {
+			v->fields[i].value += addr;
+		}
+	}
+}
+
+static vle_t *find_ppc(const ut8* buffer, ut32 addr) {
+	ut32 i;
+	ut32 data = (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
+	const ppc_t* p = NULL;
+	const ut32 size = sizeof (ppc_ops) / sizeof (ppc_t);
+	for (i = 0; i < size; ++i) {
+		p = &ppc_ops[i];
+		if ((p->op & data) == p->op && (p->mask & data) == data) {
+			vle_t* ret = (vle_t*) calloc(1, sizeof(vle_t));
+			ret->name = p->name;
+			ret->size = 4;
+			ret->n = 0;
+            ret->op_type = p->op_type;
+			set_ppc_fields (ret, p, data, addr);
+			return ret;
+		}
+	}
+	return NULL;
+}
+
+static vle_t *find_e(const ut8* buffer, ut32 addr) {
+	ut32 i;
+	ut32 data = (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
+	const e_vle_t* p = NULL;
+	const ut32 size = sizeof (e_ops) / sizeof (e_vle_t);
+	for (i = 0; i < size; ++i) {
+		p = &e_ops[i];
+		if ((p->op & data) == p->op && (p->mask & data) == data) {
+			vle_t* ret = (vle_t*) calloc(1, sizeof(vle_t));
+			ret->name = p->name;
+			ret->size = 4;
+			ret->n = 0;
+            ret->op_type = p->op_type;
+            ret->cond = p->cond;
+            ret->cond = p->cond;
+			set_e_fields (ret, p, data, addr);
+			return ret;
+		}
+	}
+	return NULL;
+}
+
+static vle_t *find_se(const ut8* buffer, ut32 addr) {
+	ut32 i, j, k;
+	ut16 data = (buffer[0] << 8) | buffer[1];
+	const se_vle_t* p = NULL;
+	const ut32 size = sizeof (se_ops) / sizeof (se_vle_t);
+	for (i = 0; i < size; ++i) {
+		p = &se_ops[i];
+		if ((p->op & data) == p->op && (p->mask & data) == data) {
+			vle_t* ret = (vle_t*) calloc(1, sizeof(vle_t));
+			ret->name = p->name;
+			ret->size = 2;
+            ret->op_type = p->op_type;
+            ret->cond = p->cond;
+			for (j = 0; j < p->n; ++j) {
+				for (k = 0; k < p->n; ++k) {
+					if (p->fields[k].idx == j) {
+						ret->fields[j].value = data & p->fields[k].mask;
+						ret->fields[j].value >>= p->fields[k].shr;
+						ret->fields[j].value <<= p->fields[k].shl;
+						ret->fields[j].value += p->fields[k].add;
+						ret->fields[j].value &= 0xFFFF;
+						if (p->fields[k].type == TYPE_REG && ret->fields[j].value & 0x8) {
+							ret->fields[j].value = (ret->fields[j].value & 0x7) + 24;
+						} else if (p->fields[k].type == TYPE_JMP) {
+							if (ret->fields[j].value & 0x0100) {
+								ret->fields[j].value = 0xFFFFFE00 | ret->fields[j].value;
+							}
+							ret->fields[j].value += addr;
+						}
+						ret->fields[j].type = p->fields[k].type;
+						break;
+					}
+				}
+			}
+			ret->n = p->n;
+			return ret;
+		}
+	}
+	return NULL;
+}
+
+/*
 int vle_init(vle_handle* handle, const uint8_t* buffer, const uint32_t size) {
   if (!handle || !buffer || size < 2) {
     return 1;
@@ -1044,7 +1661,25 @@ int vle_next(vle_handle* handle, vle_t* ret) {
 
   handle->inc = op ? op->size : 0;
   return 1;
+}*/
+
+vle_t* vle_decode_one(const ut8* buffer, const ut32 size, ut32 current_address) {
+	vle_t *op = NULL;
+	if (size < 2) {
+		return NULL;
+	}
+	if (size > 3) {
+		op = find_ppc (buffer, current_address);
+	}
+	if (!op && size > 3) {
+		op = find_e (buffer, current_address);
+	}
+	if (!op && size > 1) {
+		op = find_se (buffer, current_address);
+	}
+	return op;
 }
+
 
 void vle_free(vle_t* instr) {
   free (instr);

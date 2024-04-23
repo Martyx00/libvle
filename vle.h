@@ -7,6 +7,11 @@
   extern "C" {
 #endif
 
+typedef uint8_t ut8;
+typedef uint16_t ut16;
+typedef uint32_t ut32;
+typedef uint64_t ut64;
+
 enum field_type {
   TYPE_NONE = 0,
   TYPE_REG  = 1,
@@ -88,6 +93,7 @@ typedef struct {
 int vle_init(vle_handle* handle, const uint8_t* buffer, const uint32_t size);
 int vle_next(vle_handle* handle, vle_t* out);
 void vle_snprint(char* str, int size, uint64_t addr, vle_t* instr);
+vle_t* vle_decode_one(const ut8* buffer, const ut32 size, ut32 current_address);
 
 #ifdef __cplusplus
 }
