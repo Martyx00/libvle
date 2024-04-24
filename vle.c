@@ -337,7 +337,7 @@ const e_vle_t e_ops[] = {
   { "e_bgt"      , 0x7A000000, 0x7A110000 | E_MASK_BD15, E_BD15 ,  OP_TYPE_CJMP, COND_GT, {TYPE_CR, TYPE_IMM, TYPE_NONE, TYPE_NONE, TYPE_NONE}},
   { "e_beq"      , 0x7A000000, 0x7A120000 | E_MASK_BD15, E_BD15 ,  OP_TYPE_CJMP, COND_EQ, {TYPE_CR, TYPE_JMP, TYPE_NONE, TYPE_NONE, TYPE_NONE}},
   { "e_bso"      , 0x7A000000, 0x7A130000 | E_MASK_BD15, E_BD15 ,  OP_TYPE_CJMP, COND_VS, {TYPE_CR, TYPE_IMM, TYPE_NONE, TYPE_NONE, TYPE_NONE}},
-  // this may not be correct
+  // TODO this may not be correct
   { "e_bc"       , 0x7A000000, 0x7A140000 | E_MASK_BD15, E_BD15 ,  OP_TYPE_CJMP, COND_VS, {TYPE_CR, TYPE_IMM, TYPE_NONE, TYPE_NONE, TYPE_NONE}},
   { "e_bgel"     , 0x7A000001, 0x7A000001 | E_MASK_BD15, E_BD15 , OP_TYPE_CCALL, COND_GE, {TYPE_CR, TYPE_IMM, TYPE_NONE, TYPE_NONE, TYPE_NONE}},
   { "e_blel"     , 0x7A000001, 0x7A010001 | E_MASK_BD15, E_BD15 , OP_TYPE_CCALL, COND_LE, {TYPE_CR, TYPE_IMM, TYPE_NONE, TYPE_NONE, TYPE_NONE}},
@@ -1533,6 +1533,26 @@ static void set_ppc_fields(vle_t * v, const ppc_t* p, ut32 data, ut32 addr) {
 			v->fields[0].type = p->types[0];
 		}
 			break;
+        case F_X_2:
+        {
+            v->n = 0;
+            if (p->types[1] != TYPE_NONE) {
+                v->fields[v->n].value = (data & 0x1F0000) >> 16;
+                v->fields[v->n].type = p->types[1];
+                v->n++;
+            }
+            if (p->types[0] != TYPE_NONE) {
+                v->fields[v->n].value = (data & 0x3E00000) >> 21;
+                v->fields[v->n].type = p->types[0];
+                v->n++;
+            }
+            if (p->types[2] != TYPE_NONE) {
+                v->fields[v->n].value = (data & 0xF800) >> 11;
+                v->fields[v->n].type = p->types[2];
+                v->n++;
+            }
+        }
+            break;
 		case E_NONE:
 		default:
 			v->n = 0;
