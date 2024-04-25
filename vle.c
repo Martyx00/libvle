@@ -33,6 +33,7 @@ enum e_encoding_type {
   E_XRA   = 17,
   E_IA16U = 18,
   E_SCI8CR= 19,
+  E_SCI8FLIP = 20
 };
 
 #define E_MASK_X    0x03FFF800
@@ -388,26 +389,26 @@ const e_vle_t e_ops[] = {
   { "e_cror"     , 0x7C000382, 0x7C000382 | E_MASK_XL  , E_XL   ,    OP_TYPE_OR, COND_AL, {TYPE_CR, TYPE_CR, TYPE_CR, TYPE_NONE, TYPE_NONE}},
   { "e_crorc"    , 0x7C000342, 0x7C000342 | E_MASK_XL  , E_XL   ,    OP_TYPE_OR, COND_AL, {TYPE_CR, TYPE_CR, TYPE_CR, TYPE_NONE, TYPE_NONE}},
   { "e_crxor"    , 0x7C000182, 0x7C000182 | E_MASK_XL  , E_XL   ,   OP_TYPE_XOR, COND_AL, {TYPE_CR, TYPE_CR, TYPE_CR, TYPE_NONE, TYPE_NONE}},
-  { "e_lbz"      , 0x30000000, 0x30000000 | E_MASK_D   , E_D    ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "e_lbzu"     , 0x18000000, 0x18000000 | E_MASK_D8  , E_D8   ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "e_lha"      , 0x38000000, 0x38000000 | E_MASK_D   , E_D    ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "e_lhau"     , 0x18000300, 0x18000300 | E_MASK_D8  , E_D8   ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
+  { "e_lbz"      , 0x30000000, 0x30000000 | E_MASK_D   , E_D    ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
+  { "e_lbzu"     , 0x18000000, 0x18000000 | E_MASK_D8  , E_D8   ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
+  { "e_lha"      , 0x38000000, 0x38000000 | E_MASK_D   , E_D    ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
+  { "e_lhau"     , 0x18000300, 0x18000300 | E_MASK_D8  , E_D8   ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
   // 5b0b0000
-  { "e_lhz"      , 0x58000000, 0x58000000 | E_MASK_D   , E_D    ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "e_lhzu"     , 0x18000100, 0x18000100 | E_MASK_D8  , E_D8   ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
+  { "e_lhz"      , 0x58000000, 0x58000000 | E_MASK_D   , E_D    ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
+  { "e_lhzu"     , 0x18000100, 0x18000100 | E_MASK_D8  , E_D8   ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
   { "e_li"       , 0x70000000, 0x70000000 | E_MASK_LI20, E_LI20 ,   OP_TYPE_MOV, COND_AL, {TYPE_REG, TYPE_IMM, TYPE_NONE, TYPE_NONE, TYPE_NONE}},
 
   { "e_lis"      , 0x7000E000, 0x7000E000 | E_MASK_I16L, E_I16LS,   OP_TYPE_MOV, COND_AL, {TYPE_REG, TYPE_IMM, TYPE_IMM, TYPE_NONE, TYPE_NONE}},
-  { "e_lmw"      , 0x18000800, 0x18000800 | E_MASK_D8  , E_D8   ,   OP_TYPE_MUL, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "e_lwz"      , 0x50000000, 0x53000000 | E_MASK_D   , E_D    ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "e_lwzu"     , 0x18000200, 0x18000200 | E_MASK_D8  , E_D8   ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
+  { "e_lmw"      , 0x18000800, 0x18000800 | E_MASK_D8  , E_D8   ,   OP_TYPE_MUL, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
+  { "e_lwz"      , 0x50000000, 0x53000000 | E_MASK_D   , E_D    ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
+  { "e_lwzu"     , 0x18000200, 0x18000200 | E_MASK_D8  , E_D8   ,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
   { "e_mcrf"     , 0x7C000020, 0x7C000020 | E_MASK_XL  , E_XLSP ,   OP_TYPE_MOV, COND_AL, {TYPE_CR, TYPE_CR, TYPE_NONE, TYPE_NONE, TYPE_NONE}},
   { "e_mull2i"   , 0x7000A000, 0x7000A000 | E_MASK_I16A, E_I16A ,   OP_TYPE_MUL, COND_AL, {TYPE_IMM, TYPE_REG, TYPE_IMM, TYPE_NONE, TYPE_NONE}},
   { "e_mulli"    , 0x1800A000, 0x1800A000 | E_MASK_SCI8, E_SCI8 ,   OP_TYPE_MUL, COND_AL, {TYPE_REG, TYPE_REG, TYPE_IMM, TYPE_IMM, TYPE_IMM}},
   { "e_or2i"     , 0x7000C000, 0x7000C000 | E_MASK_I16L, E_I16L ,    OP_TYPE_OR, COND_AL, {TYPE_REG, TYPE_IMM, TYPE_IMM, TYPE_NONE, TYPE_NONE}},
   { "e_or2is"    , 0x7000D000, 0x7000D000 | E_MASK_I16L, E_I16LS,    OP_TYPE_OR, COND_AL, {TYPE_REG, TYPE_IMM, TYPE_IMM, TYPE_NONE, TYPE_NONE}},
-  { "e_ori"      , 0x1800D000, 0x1800D000 | E_MASK_SCI8, E_SCI8 ,    OP_TYPE_OR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_IMM, TYPE_IMM, TYPE_IMM}},
-  { "e_ori."     , 0x1800D800, 0x1800D800 | E_MASK_SCI8, E_SCI8 ,    OP_TYPE_OR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_IMM, TYPE_IMM, TYPE_IMM}},
+  { "e_ori"      , 0x1800D000, 0x1800D000 | E_MASK_SCI8, E_SCI8I ,    OP_TYPE_OR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_IMM, TYPE_IMM, TYPE_IMM}},
+  { "e_ori."     , 0x1800D800, 0x1800D800 | E_MASK_SCI8, E_SCI8I ,    OP_TYPE_OR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_IMM, TYPE_IMM, TYPE_IMM}},
   { "e_rlw"      , 0x7C000230, 0x7C000230 | E_MASK_X   , E_XRA  ,   OP_TYPE_ROR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
   { "e_rlw."     , 0x7C000231, 0x7C000231 | E_MASK_X   , E_XRA  ,   OP_TYPE_ROR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
   { "e_rlwi"     , 0x7C000270, 0x7C000270 | E_MASK_X   , E_XRA  ,   OP_TYPE_ROR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_IMM, TYPE_NONE, TYPE_NONE}},
@@ -418,13 +419,13 @@ const e_vle_t e_ops[] = {
   { "e_slwi."    , 0x7C000071, 0x7C000071 | E_MASK_X   , E_XRA  ,   OP_TYPE_SHL, COND_AL, {TYPE_REG, TYPE_REG, TYPE_IMM, TYPE_NONE, TYPE_NONE}},
   { "e_srwi"     , 0x7C000470, 0x7C000470 | E_MASK_X   , E_XRA  ,   OP_TYPE_SHR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_IMM, TYPE_NONE, TYPE_NONE}},
   { "e_srwi."    , 0x7C000471, 0x7C000471 | E_MASK_X   , E_XRA  ,   OP_TYPE_SHR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_IMM, TYPE_NONE, TYPE_NONE}},
-  { "e_stb"      , 0x34000000, 0x34000000 | E_MASK_D   , E_D    , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_IMM, TYPE_NONE, TYPE_NONE}},
-  { "e_stbu"     , 0x18000400, 0x18000400 | E_MASK_D8  , E_D8   , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "e_sth"      , 0x5C000000, 0x5C000000 | E_MASK_D   , E_D    , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "e_sthu"     , 0x18000500, 0x18000500 | E_MASK_D8  , E_D8   , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "e_stmw"     , 0x18000900, 0x18000900 | E_MASK_D8  , E_D8   , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "e_stw"      , 0x54000000, 0x56000000 | E_MASK_D   , E_D    , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "e_stwu"     , 0x18000600, 0x18000600 | E_MASK_D8  , E_D8   , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_MEM, TYPE_REG, TYPE_NONE, TYPE_NONE}},
+  { "e_stb"      , 0x34000000, 0x34000000 | E_MASK_D   , E_D    , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
+  { "e_stbu"     , 0x18000400, 0x18000400 | E_MASK_D8  , E_D8   , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
+  { "e_sth"      , 0x5C000000, 0x5C000000 | E_MASK_D   , E_D    , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
+  { "e_sthu"     , 0x18000500, 0x18000500 | E_MASK_D8  , E_D8   , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
+  { "e_stmw"     , 0x18000900, 0x18000900 | E_MASK_D8  , E_D8   , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
+  { "e_stw"      , 0x54000000, 0x56000000 | E_MASK_D   , E_D    , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
+  { "e_stwu"     , 0x18000600, 0x18000600 | E_MASK_D8  , E_D8   , OP_TYPE_STORE, COND_AL, {TYPE_REG, TYPE_REG, TYPE_MEM, TYPE_NONE, TYPE_NONE}},
 
 
    /* 1d53a:	18 21 11 00 	e_stmvsprw 0(r1) */
@@ -519,582 +520,26 @@ const se_vle_t se_ops[] = {
   { "se_bseti"  , 0x6400, 0x65FF, 2,    OP_TYPE_OR, COND_AL, {{0x01F0,  4,  0,  0, 1, TYPE_IMM}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
   { "se_btsti"  , 0x6600, 0x67FF, 2,    OP_TYPE_OR, COND_AL, {{0x01F0,  4,  0,  0, 1, TYPE_IMM}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
   { "se_cmpi"   , 0x2A00, 0x2BFF, 2,   OP_TYPE_CMP, COND_AL, {{0x01F0,  4,  0,  0, 1, TYPE_IMM}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
+  { "se_cmpl"   , 0x0D00, 0x0DFF, 2,   OP_TYPE_CMP, COND_AL, {{0x01F0,  4,  0,  0, 1, TYPE_REG}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
   { "se_cmpli"  , 0x2200, 0x23FF, 2,   OP_TYPE_CMP, COND_AL, {{0x01F0,  4,  0,  1, 1, TYPE_IMM}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
-  { "se_lbz"    , 0x8000, 0x8FFF, 3,  OP_TYPE_LOAD, COND_AL, {{0x0F00,  8,  0,  0, 2, TYPE_MEM}, {0x00F0,  4,  0,  0,  0, TYPE_REG}, {0x000F,  0,  0,  0,  1, TYPE_MEM}, {0}, {0}}},
-  { "se_lhz"    , 0xA000, 0xAFFF, 3,  OP_TYPE_LOAD, COND_AL, {{0x0F00,  7,  0,  0, 2, TYPE_MEM}, {0x00F0,  4,  0,  0,  0, TYPE_REG}, {0x000F,  0,  0,  0,  1, TYPE_MEM}, {0}, {0}}},
+  { "se_lbz"    , 0x8000, 0x8FFF, 3,  OP_TYPE_LOAD, COND_AL, {{0x0F00,  8,  0,  0, 2, TYPE_MEM}, {0x00F0,  4,  0,  0,  0, TYPE_REG}, {0x000F,  0,  0,  0,  1, TYPE_REG}, {0}, {0}}},
+  { "se_lhz"    , 0xA000, 0xAFFF, 3,  OP_TYPE_LOAD, COND_AL, {{0x0F00,  7,  0,  0, 2, TYPE_MEM}, {0x00F0,  4,  0,  0,  0, TYPE_REG}, {0x000F,  0,  0,  0,  1, TYPE_REG}, {0}, {0}}},
   { "se_li"     , 0x4800, 0x4FFF, 2,   OP_TYPE_MOV, COND_AL, {{0x07F0,  4,  0,  0, 1, TYPE_IMM}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
-  { "se_lwz"    , 0xC000, 0xCFFF, 3,  OP_TYPE_LOAD, COND_AL, {{0x0F00,  6,  0,  0, 2, TYPE_MEM}, {0x00F0,  4,  0,  0,  0, TYPE_REG}, {0x000F,  0,  0,  0,  1, TYPE_MEM}, {0}, {0}}},
+  { "se_lwz"    , 0xC000, 0xCFFF, 3,  OP_TYPE_LOAD, COND_AL, {{0x0F00,  6,  0,  0, 2, TYPE_MEM}, {0x00F0,  4,  0,  0,  0, TYPE_REG}, {0x000F,  0,  0,  0,  1, TYPE_REG}, {0}, {0}}},
   { "se_or"     , 0x4400, 0x44FF, 2,    OP_TYPE_OR, COND_AL, {{0x00F0,  4,  0,  0, 1, TYPE_REG}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
-  { "se_slw"    , 0x4200, 0x42FF, 2,   OP_TYPE_SHL, COND_AL, {{0x00F0,  4,  0,  0, 0, TYPE_REG}, {0x000F,  0,  0,  0,  2, TYPE_REG}, {0}, {0}, {0}}},
+  { "se_slw"    , 0x4200, 0x42FF, 2,   OP_TYPE_SHL, COND_AL, {{0x00F0,  4,  0,  0, 1, TYPE_REG}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
   { "se_slwi"   , 0x6C00, 0x6DFF, 2,   OP_TYPE_SHL, COND_AL, {{0x01F0,  4,  0,  0, 1, TYPE_IMM}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
-  { "se_sraw"   , 0x4100, 0x41FF, 2,   OP_TYPE_SHR, COND_AL, {{0x00F0,  4,  0,  0, 0, TYPE_REG}, {0x000F,  0,  0,  0,  2, TYPE_REG}, {0}, {0}, {0}}},
+  { "se_sraw"   , 0x4100, 0x41FF, 2,   OP_TYPE_SHR, COND_AL, {{0x00F0,  4,  0,  0, 1, TYPE_REG}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
   { "se_srawi"  , 0x6A00, 0x6BFF, 2,   OP_TYPE_SHR, COND_AL, {{0x01F0,  4,  0,  0, 1, TYPE_IMM}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
-  { "se_srw"    , 0x4000, 0x40FF, 2,   OP_TYPE_SHR, COND_AL, {{0x00F0,  4,  0,  0, 0, TYPE_REG}, {0x000F,  0,  0,  0,  2, TYPE_REG}, {0}, {0}, {0}}},
+  { "se_srw"    , 0x4000, 0x40FF, 2,   OP_TYPE_SHR, COND_AL, {{0x00F0,  4,  0,  0, 0, TYPE_REG}, {0x000F,  0,  0,  0,  1, TYPE_REG}, {0}, {0}, {0}}},
   { "se_srwi"   , 0x6800, 0x69FF, 2,   OP_TYPE_SHR, COND_AL, {{0x01F0,  4,  0,  0, 1, TYPE_IMM}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
-  { "se_stb"    , 0x9000, 0x9FFF, 3, OP_TYPE_STORE, COND_AL, {{0x0F00,  8,  0,  0, 2, TYPE_MEM}, {0x00F0,  4,  0,  0,  0, TYPE_REG}, {0x000F,  0,  0,  0,  1, TYPE_MEM}, {0}, {0}}},
-  { "se_sth"    , 0xB000, 0xBFFF, 3, OP_TYPE_STORE, COND_AL, {{0x0F00,  7,  0,  0, 2, TYPE_MEM}, {0x00F0,  4,  0,  0,  0, TYPE_REG}, {0x000F,  0,  0,  0,  1, TYPE_MEM}, {0}, {0}}},
-  { "se_stw"    , 0xD000, 0xDFFF, 3, OP_TYPE_STORE, COND_AL, {{0x0F00,  6,  0,  0, 2, TYPE_MEM}, {0x00F0,  4,  0,  0,  0, TYPE_REG}, {0x000F,  0,  0,  0,  1, TYPE_MEM}, {0}, {0}}},
+  { "se_stb"    , 0x9000, 0x9FFF, 3, OP_TYPE_STORE, COND_AL, {{0x0F00,  8,  0,  0, 2, TYPE_MEM}, {0x00F0,  4,  0,  0,  0, TYPE_REG}, {0x000F,  0,  0,  0,  1, TYPE_REG}, {0}, {0}}},
+  { "se_sth"    , 0xB000, 0xBFFF, 3, OP_TYPE_STORE, COND_AL, {{0x0F00,  7,  0,  0, 2, TYPE_MEM}, {0x00F0,  4,  0,  0,  0, TYPE_REG}, {0x000F,  0,  0,  0,  1, TYPE_REG}, {0}, {0}}},
+  { "se_stw"    , 0xD000, 0xDFFF, 3, OP_TYPE_STORE, COND_AL, {{0x0F00,  6,  0,  0, 2, TYPE_MEM}, {0x00F0,  4,  0,  0,  0, TYPE_REG}, {0x000F,  0,  0,  0,  1, TYPE_REG}, {0}, {0}}},
   { "se_subi"   , 0x2400, 0x25FF, 2,   OP_TYPE_SUB, COND_AL, {{0x01F0,  4,  0,  1, 1, TYPE_IMM}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
   { "se_subi."  , 0x2600, 0x27FF, 2,   OP_TYPE_SUB, COND_AL, {{0x01F0,  4,  0,  1, 1, TYPE_IMM}, {0x000F,  0,  0,  0,  0, TYPE_REG}, {0}, {0}, {0}}},
 };
 
-/*
-static void set_e_fields(vle_t * v, const e_vle_t* p, uint32_t data) {
-  if (!v) {
-    return;
-  }
-  switch (p->type) {
-    case E_X:
-    {
-      v->n = 3;
-      v->fields[0].value = (data & 0x3E00000) >> 21;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x1F0000) >> 16;
-      v->fields[1].type = p->types[1];
-      v->fields[2].value = (data & 0xF800) >> 11;
-      v->fields[2].type = p->types[2];
-    }
-      break;
-    case E_XRA:
-    {
-      v->n = 3;
-      v->fields[0].value = (data & 0x1F0000) >> 16;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x3E00000) >> 21;
-      v->fields[1].type = p->types[1];
-      v->fields[2].value = (data & 0xF800) >> 11;
-      v->fields[2].type = p->types[2];
-    }
-      break;
-    case E_XL:
-    {
-      v->n = 3;
-      v->fields[0].value = (data & 0x3E00000) >> 21;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x1F0000) >> 16;
-      v->fields[1].type = p->types[1];
-      v->fields[2].value = (data & 0xF800) >> 11;
-      v->fields[2].type = p->types[2];
-    }
-      break;
-    case E_D:
-    {
-      v->n = 3;
-      v->fields[0].value = (data & 0x3E00000) >> 21;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x1F0000) >> 16;
-      v->fields[1].type = p->types[1];
-      v->fields[2].value = data & 0xFFFF;
-      if (v->fields[2].value & 0x8000) {
-        v->fields[2].value = 0xFFFF0000 | v->fields[2].value;
-      }
-      v->fields[2].type = p->types[2];
-    }
-      break;
-    case E_D8:
-    {
-      v->n = 3;
-      v->fields[0].value = (data & 0x3E00000) >> 21;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x1F0000) >> 16;
-      v->fields[1].type = p->types[1];
-      v->fields[2].value = data & 0xFF;
-      if (v->fields[2].value & 0x80) {
-        v->fields[2].value = 0xFFFFFF00 | v->fields[2].value;
-      }
-      v->fields[2].type = p->types[2];
-    }
-      break;
-    case E_IA16:
-    case E_IA16U:
-    case E_I16A:
-    {
-      v->n = 2;
-      v->fields[1].value = (data & 0x3E00000) >> 10;
-      v->fields[1].type = p->types[0];
-      v->fields[0].value = (data & 0x1F0000) >> 16;
-      v->fields[0].type = p->types[1];
-      v->fields[1].value |= (data & 0x7FF);
-      if (v->fields[1].value & 0x8000 && p->type != E_IA16U) {
-        v->fields[1].value = 0xFFFF0000 | v->fields[1].value;
-      }
-    }
-      break;
-    case E_SCI8:
-    case E_SCI8CR:
-    {
-      v->n = 3;
-      v->fields[0].value = (data & 0x3E00000) >> 21;
-      v->fields[0].type = p->types[0];
-      if (p->type == E_SCI8CR) {
-        v->fields[0].value &= 0x3;
-      }
-      v->fields[1].value = (data & 0x1F0000) >> 16;
-      v->fields[1].type = p->types[1];
-      uint32_t ui8 = data & 0xFF;
-      uint32_t scl = (data & 0x300) >> 8;
-      uint32_t f = data & 0x400;
-      switch (scl) {
-        case 0:
-          v->fields[2].value = ui8 | (f ? 0xffffff00 : 0);
-          break;
-        case 1:
-          v->fields[2].value = (ui8 << 8) | (f ? 0xffff00ff : 0);
-          break;
-        case 2:
-          v->fields[2].value = (ui8 << 16) | (f ? 0xff00ffff : 0);
-          break;
-        default:
-          v->fields[2].value = (ui8 << 24) | (f ? 0x00ffffff : 0);
-          break;
-      }
-      v->fields[2].type = p->types[2];
-    }
-      break;
-    case E_SCI8I:
-    {
-      v->n = 3;
-      v->fields[1].value = (data & 0x3E00000) >> 21;
-      v->fields[1].type = p->types[0];
-      v->fields[0].value = (data & 0x1F0000) >> 16;
-      v->fields[0].type = p->types[1];
-      uint32_t ui8 = data & 0xFF;
-      uint32_t scl = (data & 0x300) >> 8;
-      uint32_t f = data & 0x400;
-      switch (scl) {
-        case 0:
-          v->fields[2].value = ui8 | (f ? 0xffffff00 : 0);
-          break;
-        case 1:
-          v->fields[2].value = (ui8 << 8) | (f ? 0xffff00ff : 0);
-          break;
-        case 2:
-          v->fields[2].value = (ui8 << 16) | (f ? 0xff00ffff : 0);
-          break;
-        default:
-          v->fields[2].value = (ui8 << 24) | (f ? 0x00ffffff : 0);
-          break;
-      }
-      v->fields[2].type = p->types[2];
-    }
-      break;
-    case E_I16L:
-    {
-      v->n = 2;
-      v->fields[0].value = (data & 0x3E00000) >> 21;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x1F0000) >> 5;
-      v->fields[1].value |= (data & 0x7FF);
-      v->fields[1].type = p->types[1];
-    }
-      break;
-    case E_I16LS:
-    {
-      v->n = 2;
-      v->fields[0].value = (data & 0x3E00000) >> 21;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x1F0000) >> 5;
-      v->fields[1].value |= (data & 0x7FF);
-      v->fields[1].type = p->types[1];
-    }
-      break;
-    case E_BD24:
-    {
-      v->n = 1;
-      v->fields[0].value = data & 0x1FFFFFE;
-      if (v->fields[0].value & 0x1000000) {
-        v->fields[0].value |= 0xFE000000;
-      }
-      v->fields[0].type = p->types[0];
-    }
-      break;
-    case E_BD15:
-    {
-      v->n = 2;
-      v->fields[0].value = (data & 0xC0000) >> 18;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = data & 0xFFFE;
-      if (v->fields[1].value & 0x8000) {
-        v->fields[1].value |= 0xFFFF0000;
-      }
-      v->fields[1].type = p->types[1];
-    }
-      break;
-    case E_LI20:
-    {
-      v->n = 2;
-      v->fields[0].value = (data & 0x03E00000) >> 21;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = ((data & 0x001F0000) >> 5);
-      v->fields[1].value |= ((data & 0x7800) << 5);
-      v->fields[1].value |= (data & 0x7FF);
-      v->fields[1].type = p->types[1];
-      if (v->fields[1].value & 0x80000) {
-        v->fields[1].value = 0xFFF00000 | v->fields[1].value;
-      }
-    }
-      break;
-    case E_M:
-    {
-      v->n = 5;
-      v->fields[1].value = (data & 0x3E00000) >> 21;
-      v->fields[1].type = p->types[1];
-      v->fields[0].value = (data & 0x1F0000) >> 16;
-      v->fields[0].type = p->types[0];
-      v->fields[2].value = (data & 0xF800) >> 11;
-      v->fields[2].type = p->types[2];
-      v->fields[3].value = (data & 0x7C0) >> 6;
-      v->fields[3].type = p->types[3];
-      v->fields[4].value = (data & 0x3E) >> 1;
-      v->fields[4].type = p->types[4];
-    }
-      break;
-    case E_XCR:
-    {
-      v->n = 3;
-      v->fields[0].value = (data & 0x3000000) >> 24;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x1F0000) >> 16;
-      v->fields[1].type = p->types[1];
-      v->fields[2].value = (data & 0xF800) >> 11;
-      v->fields[2].type = p->types[2];
-    }
-      break;
-    case E_XLSP:
-    {
-      v->n = 3;
-      v->fields[0].value = (data & 0x3800000) >> 23;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x1C0000) >> 18;
-      v->fields[1].type = p->types[1];
-    }
-      break;
-    case E_NONE:
-    default:
-      v->n = 0;
-      break;
-  }
-}
-
-static void set_ppc_fields(vle_t * v, const ppc_t* p, uint32_t data) {
-  if (!v) {
-    return;
-  }
-  switch (p->type) {
-    case F_X:
-    case F_XO:
-    case F_EVX:
-    {
-      v->n = 0;
-      if (p->types[0] != TYPE_NONE) {
-        v->fields[v->n].value = (data & 0x3E00000) >> 21;
-        v->fields[v->n].type = p->types[0];
-        v->n++;
-      }
-      if (p->types[1] != TYPE_NONE) {
-        v->fields[v->n].value = (data & 0x1F0000) >> 16;
-        v->fields[v->n].type = p->types[1];
-        v->n++;
-      }
-      if (p->types[2] != TYPE_NONE) {
-        v->fields[v->n].value = (data & 0xF800) >> 11;
-        v->fields[v->n].type = p->types[2];
-        v->n++;
-      }
-    }
-      break;
-    case F_X_2:
-    {
-      v->n = 0;
-      if (p->types[1] != TYPE_NONE) {
-        v->fields[v->n].value = (data & 0x1F0000) >> 16;
-        v->fields[v->n].type = p->types[1];
-        v->n++;
-      }
-      if (p->types[0] != TYPE_NONE) {
-        v->fields[v->n].value = (data & 0x3E00000) >> 21;
-        v->fields[v->n].type = p->types[0];
-        v->n++;
-      }
-      if (p->types[2] != TYPE_NONE) {
-        v->fields[v->n].value = (data & 0xF800) >> 11;
-        v->fields[v->n].type = p->types[2];
-        v->n++;
-      }
-    }
-      break;
-    case F_XRA:
-    {
-      v->n = 3;
-      v->fields[0].value = (data & 0x1F0000) >> 16;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x3E00000) >> 21;
-      v->fields[1].type = p->types[1];
-      v->fields[2].value = (data & 0xF800) >> 11;
-      v->fields[2].type = p->types[2];
-    }
-      break;
-    case F_CMP:
-    {
-      v->n = 3;
-      v->fields[0].value = (data & 0x3800000) >> 23;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x1F0000) >> 16;
-      v->fields[1].type = p->types[1];
-      v->fields[2].value = (data & 0xF800) >> 11;
-      v->fields[2].type = p->types[2];
-    }
-      break;
-    case F_DCBF:
-    {
-      v->n = 3;
-      v->fields[0].value = (data & 0x0E00000) >> 21;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x1F0000) >> 16;
-      v->fields[1].type = p->types[1];
-      v->fields[2].value = (data & 0xF800) >> 11;
-      v->fields[2].type = p->types[2];
-    }
-      break;
-    case F_DCBL:
-    {
-      v->n = 3;
-      v->fields[0].value = (data & 0x1E00000) >> 21;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x1F0000) >> 16;
-      v->fields[1].type = p->types[1];
-      v->fields[2].value = (data & 0xF800) >> 11;
-      v->fields[2].type = p->types[2];
-    }
-      break;
-    case F_DCI:
-    {
-      v->n = 1;
-      v->fields[0].value = (data & 0xE00000) >> 21;
-      v->fields[0].type = p->types[0];
-    }
-      break;
-    case F_EXT:
-    {
-      v->n = 2;
-      v->fields[0].value = (data & 0x3E00000) >> 21;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x1F0000) >> 16;
-      v->fields[1].type = p->types[1];
-    }
-      break;
-    case F_A:
-    {
-      v->n = 4;
-      v->fields[0].value = (data & 0x1E00000) >> 21;
-      v->fields[0].type = p->types[0];
-      v->fields[1].value = (data & 0x1F0000) >> 16;
-      v->fields[1].type = p->types[1];
-      v->fields[2].value = (data & 0xF800) >> 11;
-      v->fields[2].type = p->types[2];
-      v->fields[3].value = (data & 0x7C0) >> 6;
-      v->fields[3].type = p->types[3];
-    }
-      break;
-    case F_XFX:
-    {
-      v->n = 1;
-      v->fields[0].value = (data & 0x3E00000) >> 21;
-      v->fields[0].type = p->types[0];
-    }
-      break;
-    case F_XER:
-    {
-      v->n = 1;
-      v->fields[0].value = (data & 0x3800000) >> 23;
-      v->fields[0].type = p->types[0];
-    }
-      break;
-    case F_MFPR:
-    {
-      v->n = 2;
-      v->fields[0].value = (data & 0x1E00000) >> 21;
-      v->fields[0].type = p->types[0];
-      // v->fields[1].value = (data & 0x1FF800) >> 11; 
-      v->fields[1].value = ((data & 0x1f0000) >> 16) | ((data & 0xf800) >> 6);
-      v->fields[1].type = p->types[1];
-      break;
-    }
-    case F_MTPR:
-    {
-      v->n = 2;
-      //inverted
-      v->fields[1].value = (data & 0x1E00000) >> 21;
-      v->fields[1].type = p->types[1];
-      v->fields[0].value = ((data & 0x1f0000) >> 16) | ((data & 0xf800) >> 6);
-      v->fields[0].type = p->types[0];
-    }
-      break;
-    case E_NONE:
-    default:
-      v->n = 0;
-      break;
-  }
-}
-static vle_t *find_ppc(const ut8* buffer, ut32 addr) {
-	ut32 i;
-	ut32 data = (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
-	const ppc_t* p = NULL;
-	const ut32 size = sizeof (ppc_ops) / sizeof (ppc_t);
-	for (i = 0; i < size; ++i) {
-		p = &ppc_ops[i];
-		if ((p->op & data) == p->op && (p->mask & data) == data) {
-			vle_t* ret = (vle_t*) calloc(1, sizeof(vle_t));
-			ret->name = p->name;
-			ret->size = 4;
-			ret->n = 0;
-			set_ppc_fields (ret, p, data, addr);
-			return ret;
-		}
-	}
-	return NULL;
-}
-
-static vle_t *find_e(const ut8* buffer, ut32 addr) {
-	ut32 i;
-	ut32 data = (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
-	const e_vle_t* p = NULL;
-	const ut32 size = sizeof (e_ops) / sizeof (e_vle_t);
-	for (i = 0; i < size; ++i) {
-		p = &e_ops[i];
-		if ((p->op & data) == p->op && (p->mask & data) == data) {
-			vle_t* ret = (vle_t*) calloc(1, sizeof(vle_t));
-			ret->name = p->name;
-			ret->size = 4;
-			ret->n = 0;
-			set_e_fields (ret, p, data, addr);
-			return ret;
-		}
-	}
-	return NULL;
-}
-
-static vle_t *find_se(const ut8* buffer, ut32 addr) {
-	ut32 i, j, k;
-	ut16 data = (buffer[0] << 8) | buffer[1];
-	const se_vle_t* p = NULL;
-	const ut32 size = sizeof (se_ops) / sizeof (se_vle_t);
-	for (i = 0; i < size; ++i) {
-		p = &se_ops[i];
-		if ((p->op & data) == p->op && (p->mask & data) == data) {
-			vle_t* ret = (vle_t*) calloc(1, sizeof(vle_t));
-			ret->name = p->name;
-			ret->size = 2;
-			for (j = 0; j < p->n; ++j) {
-				for (k = 0; k < p->n; ++k) {
-					if (p->fields[k].idx == j) {
-						ret->fields[j].value = data & p->fields[k].mask;
-						ret->fields[j].value >>= p->fields[k].shr;
-						ret->fields[j].value <<= p->fields[k].shl;
-						ret->fields[j].value += p->fields[k].add;
-						ret->fields[j].value &= 0xFFFF;
-						if (p->fields[k].type == TYPE_REG && ret->fields[j].value & 0x8) {
-							ret->fields[j].value = (ret->fields[j].value & 0x7) + 24;
-						} else if (p->fields[k].type == TYPE_JMP) {
-							if (ret->fields[j].value & 0x0100) {
-								ret->fields[j].value = 0xFFFFFE00 | ret->fields[j].value;
-							}
-							ret->fields[j].value += addr;
-						}
-						ret->fields[j].type = p->fields[k].type;
-						break;
-					}
-				}
-			}
-			ret->n = p->n;
-			return ret;
-		}
-	}
-	return NULL;
-}
-
-
-static vle_t *find_ppc(const uint8_t* buffer, vle_t* ret) {
-  uint32_t i;
-  uint32_t data = (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
-  const ppc_t* p = NULL;
-  const uint32_t size = sizeof (ppc_ops) / sizeof (ppc_t);
-  for (i = 0; i < size; ++i) {
-    p = &ppc_ops[i];
-    if ((p->op & data) == p->op && (p->mask & data) == data) {
-      ret->name = p->name;
-      ret->size = 4;
-      ret->n = 0;
-      ret->op_type = p->op_type;
-      ret->cond = p->cond;
-      set_ppc_fields (ret, p, data);
-      return ret;
-    }
-  }
-  return NULL;
-}
-
-static vle_t *find_e(const uint8_t* buffer, vle_t* ret) {
-  uint32_t i;
-  uint32_t data = (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
-  const e_vle_t* p = NULL;
-  const uint32_t size = sizeof (e_ops) / sizeof (e_vle_t);
-  for (i = 0; i < size; ++i) {
-    p = &e_ops[i];
-    if ((p->op & data) == p->op && (p->mask & data) == data) {
-      ret->name = p->name;
-      ret->size = 4;
-      ret->n = 0;
-      ret->op_type = p->op_type;
-      ret->cond = p->cond;
-      set_e_fields (ret, p, data);
-      return ret;
-    }
-  }
-  return NULL;
-}
-
-static vle_t *find_se(const uint8_t* buffer, vle_t* ret) {
-  uint32_t i, j, k;
-  uint16_t data = (buffer[0] << 8) | buffer[1];
-  const se_vle_t* p = NULL;
-  const uint32_t size = sizeof (se_ops) / sizeof (se_vle_t);
-  for (i = 0; i < size; ++i) {
-    p = &se_ops[i];
-    if ((p->op & data) == p->op && (p->mask & data) == data) {
-      ret->name = p->name;
-      ret->size = 2;
-      ret->op_type = p->op_type;
-      ret->cond = p->cond;
-      for (j = 0; j < p->n; ++j) {
-        for (k = 0; k < p->n; ++k) {
-          if (p->fields[k].idx == j) {
-            ret->fields[j].value = data & p->fields[k].mask;
-            ret->fields[j].value >>= p->fields[k].shr;
-            ret->fields[j].value <<= p->fields[k].shl;
-            ret->fields[j].value += p->fields[k].add;
-            ret->fields[j].value &= 0xFFFF;
-            if (p->fields[k].type == TYPE_REG && ret->fields[j].value & 0x8) {
-              ret->fields[j].value = (ret->fields[j].value & 0x7) + 24;
-            } else if (p->fields[k].type == TYPE_JMP && ret->fields[j].value & 0x0100) {
-              ret->fields[j].value = 0xFFFFFE00 | ret->fields[j].value;
-            } else if (p->fields[k].type == TYPE_MEM && ret->fields[j-1].type == TYPE_MEM && ret->fields[j-1].value & 0x8) {
-              // this fixes up the r0-r7/r24-r31 on the previous register-based part of this offset
-              // yes, it's ugly as sin.
-              ret->fields[j-1].value = (ret->fields[j-1].value & 0x7) + 24;
-            }
-            ret->fields[j].type = p->fields[k].type;
-            break;
-          }
-        }
-      }
-      ret->n = p->n;
-      return ret;
-    }
-  }
-  return NULL;
-}
-*/
 
 static void set_e_fields(vle_t * v, const e_vle_t* p, ut32 data, ut32 addr) {
 	if (!v) {
