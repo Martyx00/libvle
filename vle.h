@@ -67,7 +67,8 @@ enum op_condition {
   COND_GT,
   COND_EQ,
   COND_VS,
-  COND_NV
+  COND_NV,
+  COND_NZ
 };
 
 typedef struct {
