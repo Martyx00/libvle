@@ -708,9 +708,9 @@ static void set_e_fields(vle_t * v, const e_vle_t* p, ut32 data, ut32 addr) {
 			v->fields[1].value = (data & 0x1F0000) >> 16;
 			v->fields[1].type = p->types[1];
 			v->fields[2].value = data & 0xFFFF;
-			if (v->fields[2].value & 0x8000) {
+			/*if (v->fields[2].value & 0x8000) {
 				v->fields[2].value = 0xFFFF0000 | v->fields[2].value;
-			}
+			}*/
 			v->fields[2].type = p->types[2];
 		}
 			break;
@@ -722,9 +722,9 @@ static void set_e_fields(vle_t * v, const e_vle_t* p, ut32 data, ut32 addr) {
 			v->fields[1].value = (data & 0x1F0000) >> 16;
 			v->fields[1].type = p->types[1];
 			v->fields[2].value = data & 0xFF;
-			if (v->fields[2].value & 0x80) {
+			/*if (v->fields[2].value & 0x80) {
 				v->fields[2].value = 0xFFFFFF00 | v->fields[2].value;
-			}
+			}*/
 			v->fields[2].type = p->types[2];
 		}
 			break;
@@ -734,9 +734,9 @@ static void set_e_fields(vle_t * v, const e_vle_t* p, ut32 data, ut32 addr) {
 			v->fields[0].value = (data & 0x1F0000) >> 16;
 			v->fields[0].type = p->types[0];
 			v->fields[1].value = data & 0xFF;
-			if (v->fields[1].value & 0x80) {
+			/*if (v->fields[1].value & 0x80) {
 				v->fields[1].value = 0xFFFFFF00 | v->fields[1].value;
-			}
+			}*/
 			v->fields[1].type = p->types[1];
 		}
 			break;
@@ -759,9 +759,9 @@ static void set_e_fields(vle_t * v, const e_vle_t* p, ut32 data, ut32 addr) {
 			v->fields[0].value = (data & 0x1F0000) >> 16;
 			v->fields[0].type = p->types[1];
 			v->fields[1].value |= (data & 0x7FF);
-			if (v->fields[1].value & 0x8000) {
+			/*if (v->fields[1].value & 0x8000) {
 				v->fields[1].value = 0xFFFF0000 | v->fields[1].value;
-			}
+			}*/
 		}
 			break;
 		case E_SCI8:
@@ -864,7 +864,7 @@ static void set_e_fields(vle_t * v, const e_vle_t* p, ut32 data, ut32 addr) {
 			v->fields[1].type = p->types[1];
 		}
 			break;
-		case E_BD15b:
+		case E_BD15b: // TODO check
 		{
 			v->n = 3;
 			v->fields[0].value = (data & 0x300000) >> 20;
@@ -878,7 +878,7 @@ static void set_e_fields(vle_t * v, const e_vle_t* p, ut32 data, ut32 addr) {
 			v->fields[2].type = p->types[2];
 		}
 			break;
-		case E_BD15c:
+		case E_BD15c: // TODO check
 		{
 			v->n = 1;
 			v->fields[0].value = data & 0xFFFE;
