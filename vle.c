@@ -48,6 +48,7 @@ enum e_encoding_type {
 #define E_MASK_IA16 0x03FF07FF
 #define E_MASK_LI20 0x03FF7FFF
 #define E_MASK_M    0x03FFFFFE
+#define F_MASK_CFH   0x03E0F800
 
 enum f_encoding_type {
   F_NONE = 0,
