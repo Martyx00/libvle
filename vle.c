@@ -242,10 +242,10 @@ const ppc_t ppc_ops[] = {
   { "ici"        , 0x7C00078C, 0x7C00078C | F_MASK_DCI ,   F_DCI,    OP_TYPE_IO, COND_AL, {TYPE_IMM, TYPE_NONE, TYPE_NONE, TYPE_NONE, TYPE_NONE}},
   { "icread"     , 0x7C0007CC, 0x7C0007CC | F_MASK_X   ,     F_X,    OP_TYPE_IO, COND_AL, {TYPE_NONE, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
   //apply only X instead of A for lt, gt, eq
-  { "isellt"     , 0x7C00001E, 0x7C00001E | F_MASK_X   ,     F_A,    OP_TYPE_OR, COND_AL, {TYPE_NONE, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "iselgt"     , 0x7C00001E, 0x7C00005E | F_MASK_X   ,     F_A,    OP_TYPE_OR, COND_AL, {TYPE_NONE, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "iseleq"     , 0x7C00001E, 0x7C00009E | F_MASK_X   ,     F_A,    OP_TYPE_OR, COND_AL, {TYPE_NONE, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  { "isel"       , 0x7C00001E, 0x7C00001E | F_MASK_A   ,     F_A,    OP_TYPE_OR, COND_AL, {TYPE_NONE, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
+  //{ "isellt"     , 0x7C00001E, 0x7C00001E | F_MASK_X   ,     F_A,    OP_TYPE_OR, COND_AL, {TYPE_NONE, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
+  //{ "iselgt"     , 0x7C00001E, 0x7C00005E | F_MASK_X   ,     F_A,    OP_TYPE_OR, COND_AL, {TYPE_NONE, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
+  //{ "iseleq"     , 0x7C00001E, 0x7C00009E | F_MASK_X   ,     F_A,    OP_TYPE_OR, COND_AL, {TYPE_NONE, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
+  { "isel"       , 0x7C00001E, 0x7C00001E | F_MASK_A   ,     F_A,    OP_TYPE_OR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_REG, TYPE_IMM, TYPE_NONE}},
   { "lbepx"      , 0x7C0000BE, 0x7C0000BE | F_MASK_X   ,     F_X,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
   { "lbzux"      , 0x7C0000AE, 0x7C0000AE | F_MASK_X   ,     F_X,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
   { "lhaux"      , 0x7C0002EE, 0x7C0002EE | F_MASK_X   ,     F_X,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
@@ -1715,9 +1715,9 @@ static void set_e_fields(vle_t * v, const e_vle_t* p, ut32 data, ut32 addr) {
 			v->fields[1].value = (data & 0x1F0000) >> 16;
 			v->fields[1].type = p->types[1];
 			v->fields[2].value = data & 0xFFFF;
-			/*if (v->fields[2].value & 0x8000) {
+			if (v->fields[2].value & 0x8000) {
 				v->fields[2].value = 0xFFFF0000 | v->fields[2].value;
-			}*/
+			}
 			v->fields[2].type = p->types[2];
 		}
 			break;
@@ -1729,9 +1729,9 @@ static void set_e_fields(vle_t * v, const e_vle_t* p, ut32 data, ut32 addr) {
 			v->fields[1].value = (data & 0x1F0000) >> 16;
 			v->fields[1].type = p->types[1];
 			v->fields[2].value = data & 0xFF;
-			/*if (v->fields[2].value & 0x80) {
+			if (v->fields[2].value & 0x80) {
 				v->fields[2].value = 0xFFFFFF00 | v->fields[2].value;
-			}*/
+			}
 			v->fields[2].type = p->types[2];
 		}
 			break;
@@ -1766,9 +1766,9 @@ static void set_e_fields(vle_t * v, const e_vle_t* p, ut32 data, ut32 addr) {
 			v->fields[0].value = (data & 0x1F0000) >> 16;
 			v->fields[0].type = p->types[1];
 			v->fields[1].value |= (data & 0x7FF);
-			/*if (v->fields[1].value & 0x8000) {
+			if (v->fields[1].value & 0x8000) {
 				v->fields[1].value = 0xFFFF0000 | v->fields[1].value;
-			}*/
+			}
 		}
 			break;
 		case E_SCI8:
@@ -1905,7 +1905,9 @@ static void set_e_fields(vle_t * v, const e_vle_t* p, ut32 data, ut32 addr) {
 			v->fields[1].value |= (data & 0x7FF);
 			v->fields[1].type = p->types[1];
 			if (v->fields[1].value & 0x80000) {
-				v->fields[1].value = 0xFFF00000 | v->fields[1].value;
+				int m = 1U << (20 - 1);
+                v->fields[1].value = (v->fields[1].value ^ m) - m;
+				//v->fields[1].value = 0xFFF00000 | v->fields[1].value;
 			}
 		}
 			break;
@@ -2243,9 +2245,13 @@ static vle_t *find_se(const ut8* buffer, ut32 addr) {
 						ret->fields[j].value <<= p->fields[k].shl;
 						ret->fields[j].value += p->fields[k].add;
 						ret->fields[j].value &= 0xFFFF;
-						if (p->fields[k].type == TYPE_REG && ret->fields[j].value & 0x8) {
+						if (p->fields[k].type == TYPE_REG && p->fields[k].add == 8) {
+							//ret->fields[j].value = (ret->fields[j].value + 0x8);
+						} else if (p->fields[k].type == TYPE_REG && ret->fields[j].value & 0x8) {
 							ret->fields[j].value = (ret->fields[j].value & 0x7) + 24;
-						} else if (p->fields[k].type == TYPE_JMP) {
+						} 
+						
+						if (p->fields[k].type == TYPE_JMP) {
 							if (ret->fields[j].value & 0x0100) {
 								ret->fields[j].value = 0xFFFFFE00 | ret->fields[j].value;
 							}
