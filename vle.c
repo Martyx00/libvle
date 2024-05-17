@@ -67,7 +67,8 @@ enum f_encoding_type {
   F_MFPR = 12,
   F_MTPR = 13,
   F_XRA  = 14,
-  F_X_2  = 15
+  F_X_2  = 15,
+  F_AP   = 16
 };
 
 #define F_MASK_X     0x03FFF800
@@ -242,10 +243,11 @@ const ppc_t ppc_ops[] = {
   { "ici"        , 0x7C00078C, 0x7C00078C | F_MASK_DCI ,   F_DCI,    OP_TYPE_IO, COND_AL, {TYPE_IMM, TYPE_NONE, TYPE_NONE, TYPE_NONE, TYPE_NONE}},
   { "icread"     , 0x7C0007CC, 0x7C0007CC | F_MASK_X   ,     F_X,    OP_TYPE_IO, COND_AL, {TYPE_NONE, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
   //apply only X instead of A for lt, gt, eq
-  //{ "isellt"     , 0x7C00001E, 0x7C00001E | F_MASK_X   ,     F_A,    OP_TYPE_OR, COND_AL, {TYPE_NONE, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  //{ "iselgt"     , 0x7C00001E, 0x7C00005E | F_MASK_X   ,     F_A,    OP_TYPE_OR, COND_AL, {TYPE_NONE, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
-  //{ "iseleq"     , 0x7C00001E, 0x7C00009E | F_MASK_X   ,     F_A,    OP_TYPE_OR, COND_AL, {TYPE_NONE, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
+  { "isellt"     , 0x7C00001E, 0x7C00001E | F_MASK_X   ,     F_AP,    OP_TYPE_OR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
+  { "iselgt"     , 0x7C00001E, 0x7C00005E | F_MASK_X   ,     F_AP,    OP_TYPE_OR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
+  { "iseleq"     , 0x7C00001E, 0x7C00009E | F_MASK_X   ,     F_AP,    OP_TYPE_OR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
   { "isel"       , 0x7C00001E, 0x7C00001E | F_MASK_A   ,     F_A,    OP_TYPE_OR, COND_AL, {TYPE_REG, TYPE_REG, TYPE_REG, TYPE_IMM, TYPE_NONE}},
+  
   { "lbepx"      , 0x7C0000BE, 0x7C0000BE | F_MASK_X   ,     F_X,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
   { "lbzux"      , 0x7C0000AE, 0x7C0000AE | F_MASK_X   ,     F_X,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
   { "lhaux"      , 0x7C0002EE, 0x7C0002EE | F_MASK_X   ,     F_X,  OP_TYPE_LOAD, COND_AL, {TYPE_REG, TYPE_REG, TYPE_REG, TYPE_NONE, TYPE_NONE}},
@@ -2098,6 +2100,19 @@ static void set_ppc_fields(vle_t * v, const ppc_t* p, ut32 data, ut32 addr) {
 		{
 			v->n = 4;
 			v->fields[0].value = (data & 0x1E00000) >> 21;
+			v->fields[0].type = p->types[0];
+			v->fields[1].value = (data & 0x1F0000) >> 16;
+			v->fields[1].type = p->types[1];
+			v->fields[2].value = (data & 0xF800) >> 11;
+			v->fields[2].type = p->types[2];
+			v->fields[3].value = (data & 0x7C0) >> 6;
+			v->fields[3].type = p->types[3];
+		}
+			break;
+		case F_AP:
+		{
+			v->n = 4;
+			v->fields[0].value = (data & 0x3E00000) >> 21;
 			v->fields[0].type = p->types[0];
 			v->fields[1].value = (data & 0x1F0000) >> 16;
 			v->fields[1].type = p->types[1];
